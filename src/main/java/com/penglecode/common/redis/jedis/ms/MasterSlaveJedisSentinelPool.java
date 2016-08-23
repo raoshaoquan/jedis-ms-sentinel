@@ -82,6 +82,9 @@ public class MasterSlaveJedisSentinelPool extends Pool<MasterSlaveJedis> {
         this.timeout = timeout;
         this.password = password;
         this.database = database;
+        if (password != null && password.trim().equals("")) {
+            this.password = null;
+        }
 
         initSentinelPool();
         initSentinelLiseners();
