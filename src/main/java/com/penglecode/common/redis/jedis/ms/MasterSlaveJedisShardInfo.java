@@ -22,7 +22,7 @@ public class MasterSlaveJedisShardInfo extends ShardInfo<MasterSlaveJedis> {
     }
 
     public MasterSlaveJedisShardInfo(String masterName, JedisShardInfo masterShard, List<JedisShardInfo> slaveShards, int weight) {
-        this(masterName, masterShard, slaveShards, Sharded.DEFAULT_WEIGHT, null);
+        this(masterName, masterShard, slaveShards, weight, null);
     }
 
     public MasterSlaveJedisShardInfo(String masterName, JedisShardInfo masterShard, List<JedisShardInfo> slaveShards, int weight, String name) {
@@ -53,6 +53,7 @@ public class MasterSlaveJedisShardInfo extends ShardInfo<MasterSlaveJedis> {
         return slaveShards;
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{masterName=" + masterName + ", master=" + masterShard.getHost() + ":" + masterShard.getPort() + ", slaves=");

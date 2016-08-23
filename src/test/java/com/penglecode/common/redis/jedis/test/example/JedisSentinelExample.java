@@ -29,6 +29,7 @@ public class JedisSentinelExample extends AbstractJedisExample<Jedis> {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void getResource() throws Exception {
 		Jedis master = null;
 		try {

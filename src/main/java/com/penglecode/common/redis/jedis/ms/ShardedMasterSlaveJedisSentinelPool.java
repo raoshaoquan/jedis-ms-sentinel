@@ -216,12 +216,14 @@ public class ShardedMasterSlaveJedisSentinelPool extends Pool<ShardedMasterSlave
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void returnBrokenResource(final ShardedMasterSlaveJedis resource) {
         if (resource != null) {
             returnBrokenResourceObject(resource);
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void returnResource(final ShardedMasterSlaveJedis resource) {
         if (resource != null) {
             // get a reference because it can change concurrently
@@ -259,9 +261,6 @@ public class ShardedMasterSlaveJedisSentinelPool extends Pool<ShardedMasterSlave
         protected long subscribeRetryWaitTimeMillis = 5000;
         protected Jedis sentinelJedis;
         protected AtomicBoolean running = new AtomicBoolean(false);
-
-        protected ShardedMasterSlaveListener() {
-        }
 
         public ShardedMasterSlaveListener(Set<String> masterNames, String host, int port) {
             this.masterNames = masterNames;
@@ -410,7 +409,7 @@ public class ShardedMasterSlaveJedisSentinelPool extends Pool<ShardedMasterSlave
 
         public PooledObject<ShardedMasterSlaveJedis> makeObject() throws Exception {
             ShardedMasterSlaveJedis shardedMasterSlaveJedis = new ShardedMasterSlaveJedis(shards, algo, keyTagPattern);
-            return new DefaultPooledObject<ShardedMasterSlaveJedis>(shardedMasterSlaveJedis);
+            return new DefaultPooledObject<>(shardedMasterSlaveJedis);
         }
 
         public void destroyObject(PooledObject<ShardedMasterSlaveJedis> pooledShardedMasterSlaveJedis)

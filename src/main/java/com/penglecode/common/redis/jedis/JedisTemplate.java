@@ -14,6 +14,7 @@ public class JedisTemplate<I> {
         return jedisPool.getResource();
     }
 
+    @SuppressWarnings("deprecation")
     protected void returnResource(I jedis) {
         if (jedis != null) {
             jedisPool.returnResource(jedis);

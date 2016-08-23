@@ -1,7 +1,6 @@
 apply plugin: 'java'
-apply plugin: 'eclipse'
+apply plugin: 'idea'
 apply plugin: 'maven'
-apply plugin: 'signing' //使用signing plugin做数字签名
 
 group = 'com.github.penggle'
 version = '1.0.0'
@@ -12,7 +11,7 @@ ext.versions = [
 	junit: '4.11',
 	slf4j: '1.7.7',
 	logback: '1.1.2',
-	jedis: '2.6.2'
+	jedis: '2.8.0'
 ]
 
 [compileJava, javadoc, compileTestJava]*.options*.encoding = "UTF-8"

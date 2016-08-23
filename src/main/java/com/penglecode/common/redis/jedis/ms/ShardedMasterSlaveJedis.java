@@ -9,14 +9,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import redis.clients.jedis.*;
 import redis.clients.jedis.BinaryClient.LIST_POSITION;
-import redis.clients.jedis.BinaryJedisCommands;
-import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.JedisCommands;
-import redis.clients.jedis.JedisShardInfo;
-import redis.clients.jedis.ScanResult;
-import redis.clients.jedis.SortingParams;
-import redis.clients.jedis.Tuple;
+import redis.clients.jedis.params.geo.GeoRadiusParam;
+import redis.clients.jedis.params.sortedset.ZAddParams;
+import redis.clients.jedis.params.sortedset.ZIncrByParams;
 import redis.clients.util.Hashing;
 import redis.clients.util.Pool;
 import redis.clients.util.Sharded;
@@ -101,6 +98,11 @@ public class ShardedMasterSlaveJedis extends
         return j.set(key, value, nxxx, expx, time);
     }
 
+    @Override
+    public String set(String key, String value, String nxxx) {
+        return null;
+    }
+
     public String get(String key) {
         MasterSlaveJedis j = getShard(key);
         return j.get(key);
@@ -126,14 +128,30 @@ public class ShardedMasterSlaveJedis extends
         return j.expire(key, seconds);
     }
 
+    @Override
+    @SuppressWarnings("deprecation")
+    public Long pexpire(String key, long milliseconds) {
+        return null;
+    }
+
     public Long expireAt(String key, long unixTime) {
         MasterSlaveJedis j = getShard(key);
         return j.expireAt(key, unixTime);
     }
 
+    @Override
+    public Long pexpireAt(String key, long millisecondsTimestamp) {
+        return null;
+    }
+
     public Long ttl(String key) {
         MasterSlaveJedis j = getShard(key);
         return j.ttl(key);
+    }
+
+    @Override
+    public Long pttl(String key) {
+        return null;
     }
 
     public Boolean setbit(String key, long offset, boolean value) {
@@ -174,6 +192,11 @@ public class ShardedMasterSlaveJedis extends
     public String setex(String key, int seconds, String value) {
         MasterSlaveJedis j = getShard(key);
         return j.setex(key, seconds, value);
+    }
+
+    @Override
+    public String psetex(String key, long milliseconds, String value) {
+        return null;
     }
 
     @Deprecated
@@ -398,6 +421,11 @@ public class ShardedMasterSlaveJedis extends
         return j.spop(key);
     }
 
+    @Override
+    public Set<String> spop(String key, long count) {
+        return null;
+    }
+
     public Long scard(String key) {
         MasterSlaveJedis j = getShard(key);
         return j.scard(key);
@@ -423,9 +451,19 @@ public class ShardedMasterSlaveJedis extends
         return j.zadd(key, score, member);
     }
 
+    @Override
+    public Long zadd(String key, double score, String member, ZAddParams params) {
+        return null;
+    }
+
     public Long zadd(String key, Map<String, Double> scoreMembers) {
         MasterSlaveJedis j = getShard(key);
         return j.zadd(key, scoreMembers);
+    }
+
+    @Override
+    public Long zadd(String key, Map<String, Double> scoreMembers, ZAddParams params) {
+        return null;
     }
 
     public Set<String> zrange(String key, long start, long end) {
@@ -441,6 +479,11 @@ public class ShardedMasterSlaveJedis extends
     public Double zincrby(String key, double score, String member) {
         MasterSlaveJedis j = getShard(key);
         return j.zincrby(key, score, member);
+    }
+
+    @Override
+    public Double zincrby(String key, double score, String member, ZIncrByParams params) {
+        return null;
     }
 
     public Long zrank(String key, String member) {
@@ -617,6 +660,16 @@ public class ShardedMasterSlaveJedis extends
         return getShard(key).zrangeByLex(key, min, max, offset, count);
     }
 
+    @Override
+    public Set<String> zrevrangeByLex(String key, String max, String min) {
+        return null;
+    }
+
+    @Override
+    public Set<String> zrevrangeByLex(String key, String max, String min, int offset, int count) {
+        return null;
+    }
+
     public Long zremrangeByLex(final String key, final String min,
                                final String max) {
         return getShard(key).zremrangeByLex(key, min, max);
@@ -636,6 +689,16 @@ public class ShardedMasterSlaveJedis extends
     public Long bitcount(final String key, long start, long end) {
         MasterSlaveJedis j = getShard(key);
         return j.bitcount(key, start, end);
+    }
+
+    @Override
+    public Long bitpos(String key, boolean value) {
+        return null;
+    }
+
+    @Override
+    public Long bitpos(String key, boolean value, BitPosParams params) {
+        return null;
     }
 
     @Deprecated
@@ -677,14 +740,29 @@ public class ShardedMasterSlaveJedis extends
         return j.hscan(key, cursor);
     }
 
+    @Override
+    public ScanResult<Entry<String, String>> hscan(String key, String cursor, ScanParams params) {
+        return null;
+    }
+
     public ScanResult<String> sscan(String key, final String cursor) {
         MasterSlaveJedis j = getShard(key);
         return j.sscan(key, cursor);
     }
 
+    @Override
+    public ScanResult<String> sscan(String key, String cursor, ScanParams params) {
+        return null;
+    }
+
     public ScanResult<Tuple> zscan(String key, final String cursor) {
         MasterSlaveJedis j = getShard(key);
         return j.zscan(key, cursor);
+    }
+
+    @Override
+    public ScanResult<Tuple> zscan(String key, String cursor, ScanParams params) {
+        return null;
     }
 
     public Long pfadd(String key, String... elements) {
@@ -697,9 +775,69 @@ public class ShardedMasterSlaveJedis extends
         return j.pfcount(key);
     }
 
+    @Override
+    public Long geoadd(String key, double longitude, double latitude, String member) {
+        return null;
+    }
+
+    @Override
+    public Long geoadd(String key, Map<String, GeoCoordinate> memberCoordinateMap) {
+        return null;
+    }
+
+    @Override
+    public Double geodist(String key, String member1, String member2) {
+        return null;
+    }
+
+    @Override
+    public Double geodist(String key, String member1, String member2, GeoUnit unit) {
+        return null;
+    }
+
+    @Override
+    public List<String> geohash(String key, String... members) {
+        return null;
+    }
+
+    @Override
+    public List<GeoCoordinate> geopos(String key, String... members) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadius(String key, double longitude, double latitude, double radius, GeoUnit unit) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadius(String key, double longitude, double latitude, double radius, GeoUnit unit, GeoRadiusParam param) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadiusByMember(String key, String member, double radius, GeoUnit unit) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadiusByMember(String key, String member, double radius, GeoUnit unit, GeoRadiusParam param) {
+        return null;
+    }
+
     public String set(byte[] key, byte[] value) {
         MasterSlaveJedis j = getShard(key);
         return j.set(key, value);
+    }
+
+    @Override
+    public String set(byte[] key, byte[] value, byte[] nxxx) {
+        return null;
+    }
+
+    @Override
+    public String set(byte[] key, byte[] value, byte[] nxxx, byte[] expx, long time) {
+        return null;
     }
 
     public byte[] get(byte[] key) {
@@ -722,9 +860,19 @@ public class ShardedMasterSlaveJedis extends
         return j.expire(key, seconds);
     }
 
+    @Override
+    public Long pexpire(byte[] key, long milliseconds) {
+        return null;
+    }
+
     public Long expireAt(byte[] key, long unixTime) {
         MasterSlaveJedis j = getShard(key);
         return j.expireAt(key, unixTime);
+    }
+
+    @Override
+    public Long pexpireAt(byte[] key, long millisecondsTimestamp) {
+        return null;
     }
 
     public Long ttl(byte[] key) {
@@ -942,6 +1090,11 @@ public class ShardedMasterSlaveJedis extends
         return j.spop(key);
     }
 
+    @Override
+    public Set<byte[]> spop(byte[] key, long count) {
+        return null;
+    }
+
     public Long scard(byte[] key) {
         MasterSlaveJedis j = getShard(key);
         return j.scard(key);
@@ -967,9 +1120,19 @@ public class ShardedMasterSlaveJedis extends
         return j.zadd(key, score, member);
     }
 
+    @Override
+    public Long zadd(byte[] key, double score, byte[] member, ZAddParams params) {
+        return null;
+    }
+
     public Long zadd(byte[] key, Map<byte[], Double> scoreMembers) {
         MasterSlaveJedis j = getShard(key);
         return j.zadd(key, scoreMembers);
+    }
+
+    @Override
+    public Long zadd(byte[] key, Map<byte[], Double> scoreMembers, ZAddParams params) {
+        return null;
     }
 
     public Set<byte[]> zrange(byte[] key, long start, long end) {
@@ -985,6 +1148,11 @@ public class ShardedMasterSlaveJedis extends
     public Double zincrby(byte[] key, double score, byte[] member) {
         MasterSlaveJedis j = getShard(key);
         return j.zincrby(key, score, member);
+    }
+
+    @Override
+    public Double zincrby(byte[] key, double score, byte[] member, ZIncrByParams params) {
+        return null;
     }
 
     public Long zrank(byte[] key, byte[] member) {
@@ -1164,6 +1332,16 @@ public class ShardedMasterSlaveJedis extends
         return j.zrangeByLex(key, min, max, offset, count);
     }
 
+    @Override
+    public Set<byte[]> zrevrangeByLex(byte[] key, byte[] max, byte[] min) {
+        return null;
+    }
+
+    @Override
+    public Set<byte[]> zrevrangeByLex(byte[] key, byte[] max, byte[] min, int offset, int count) {
+        return null;
+    }
+
     public Long zremrangeByLex(final byte[] key, final byte[] min,
                                final byte[] max) {
         MasterSlaveJedis j = getShard(key);
@@ -1174,21 +1352,6 @@ public class ShardedMasterSlaveJedis extends
                         byte[] value) {
         MasterSlaveJedis j = getShard(key);
         return j.linsert(key, where, pivot, value);
-    }
-
-    public Long objectRefcount(byte[] key) {
-        MasterSlaveJedis j = getShard(key);
-        return j.objectRefcount(key);
-    }
-
-    public byte[] objectEncoding(byte[] key) {
-        MasterSlaveJedis j = getShard(key);
-        return j.objectEncoding(key);
-    }
-
-    public Long objectIdletime(byte[] key) {
-        MasterSlaveJedis j = getShard(key);
-        return j.objectIdletime(key);
     }
 
     public Boolean setbit(byte[] key, long offset, boolean value) {
@@ -1258,6 +1421,57 @@ public class ShardedMasterSlaveJedis extends
         return j.pfcount(key);
     }
 
+    @Override
+    public Long geoadd(byte[] key, double longitude, double latitude, byte[] member) {
+        return null;
+    }
+
+    @Override
+    public Long geoadd(byte[] key, Map<byte[], GeoCoordinate> memberCoordinateMap) {
+        return null;
+    }
+
+    @Override
+    public Double geodist(byte[] key, byte[] member1, byte[] member2) {
+        return null;
+    }
+
+    @Override
+    public Double geodist(byte[] key, byte[] member1, byte[] member2, GeoUnit unit) {
+        return null;
+    }
+
+    @Override
+    public List<byte[]> geohash(byte[] key, byte[]... members) {
+        return null;
+    }
+
+    @Override
+    public List<GeoCoordinate> geopos(byte[] key, byte[]... members) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadius(byte[] key, double longitude, double latitude, double radius, GeoUnit unit) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadius(byte[] key, double longitude, double latitude, double radius, GeoUnit unit, GeoRadiusParam param) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadiusByMember(byte[] key, byte[] member, double radius, GeoUnit unit) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadiusByMember(byte[] key, byte[] member, double radius, GeoUnit unit, GeoRadiusParam param) {
+        return null;
+    }
+
+    @SuppressWarnings("deprecation")
     public void close() {
         if (dataSource != null) {
             boolean broken = false;
@@ -1311,6 +1525,7 @@ public class ShardedMasterSlaveJedis extends
         return b;
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("ShardedMasterSlaveJedis@" + Integer.toHexString(hashCode()) + " ");

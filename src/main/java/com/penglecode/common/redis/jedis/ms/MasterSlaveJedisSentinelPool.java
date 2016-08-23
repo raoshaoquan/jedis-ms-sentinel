@@ -96,8 +96,8 @@ public class MasterSlaveJedisSentinelPool extends Pool<MasterSlaveJedis> {
     }
 
     protected MasterSlaveHostAndPort sentinelGetMasterSlaves() {
-        HostAndPort master = null;
-        Set<HostAndPort> slaves = new LinkedHashSet<HostAndPort>();
+        HostAndPort master;
+        Set<HostAndPort> slaves = new LinkedHashSet<>();
         logger.info("Trying to find Master-Slaves from available sentinels...");
 
         for (String sentinel : sentinels) {
@@ -163,7 +163,7 @@ public class MasterSlaveJedisSentinelPool extends Pool<MasterSlaveJedis> {
             currentHostMasterSlave = masterSlaveHostAndPort;
 
             JedisShardInfo masterShard = toJedisShardInfo(masterSlaveHostAndPort.getMaster(), masterSlaveHostAndPort.getMasterName());
-            List<JedisShardInfo> slaveShards = new ArrayList<JedisShardInfo>();
+            List<JedisShardInfo> slaveShards = new ArrayList<>();
             for (HostAndPort slave : masterSlaveHostAndPort.getSlaves()) {
                 JedisShardInfo slaveShard = toJedisShardInfo(slave, null);
                 slaveShards.add(slaveShard);
@@ -209,12 +209,14 @@ public class MasterSlaveJedisSentinelPool extends Pool<MasterSlaveJedis> {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void returnBrokenResource(final MasterSlaveJedis resource) {
         if (resource != null) {
             returnBrokenResourceObject(resource);
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void returnResource(final MasterSlaveJedis resource) {
         if (resource != null) {
             // get a reference because it can change concurrently
@@ -253,9 +255,6 @@ public class MasterSlaveJedisSentinelPool extends Pool<MasterSlaveJedis> {
         protected long subscribeRetryWaitTimeMillis = 5000;
         protected Jedis sentinelJedis;
         protected AtomicBoolean running = new AtomicBoolean(false);
-
-        protected MasterSlaveListener() {
-        }
 
         public MasterSlaveListener(String masterName, String host, int port) {
             this.masterName = masterName;
@@ -410,7 +409,7 @@ public class MasterSlaveJedisSentinelPool extends Pool<MasterSlaveJedis> {
 
         public PooledObject<MasterSlaveJedis> makeObject() throws Exception {
             MasterSlaveJedis masterSlaveJedis = new MasterSlaveJedis(masterShard, slaveShards, algo, keyTagPattern);
-            return new DefaultPooledObject<MasterSlaveJedis>(masterSlaveJedis);
+            return new DefaultPooledObject<>(masterSlaveJedis);
         }
 
         public void destroyObject(PooledObject<MasterSlaveJedis> pooledMasterSlaveJedis)

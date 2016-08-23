@@ -9,29 +9,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import redis.clients.jedis.AdvancedBinaryJedisCommands;
-import redis.clients.jedis.AdvancedJedisCommands;
-import redis.clients.jedis.BasicCommands;
+import redis.clients.jedis.*;
 import redis.clients.jedis.BinaryClient.LIST_POSITION;
 import redis.clients.jedis.exceptions.JedisConnectionException;
-import redis.clients.jedis.BinaryJedisCommands;
-import redis.clients.jedis.BinaryJedisPubSub;
-import redis.clients.jedis.BinaryScriptingCommands;
-import redis.clients.jedis.BitOP;
-import redis.clients.jedis.Client;
-import redis.clients.jedis.DebugParams;
-import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCommands;
-import redis.clients.jedis.JedisPubSub;
-import redis.clients.jedis.JedisShardInfo;
-import redis.clients.jedis.MultiKeyBinaryCommands;
-import redis.clients.jedis.MultiKeyCommands;
-import redis.clients.jedis.ScanResult;
-import redis.clients.jedis.ScriptingCommands;
-import redis.clients.jedis.SortingParams;
-import redis.clients.jedis.Tuple;
-import redis.clients.jedis.ZParams;
+import redis.clients.jedis.params.geo.GeoRadiusParam;
+import redis.clients.jedis.params.sortedset.ZAddParams;
+import redis.clients.jedis.params.sortedset.ZIncrByParams;
 import redis.clients.util.Hashing;
 import redis.clients.util.Pool;
 import redis.clients.util.Sharded;
@@ -41,10 +24,11 @@ import redis.clients.util.Slowlog;
  * MasterSlaveJedis默认情况下,MasterSlaveJedis下的所有方法实际都在Master上执行,
  * 仅仅提供了一个新方法opsForSlave(...)可以获取对应所有Slave中的某个Slave
  *
- * @version 1.0
  * @author pengpeng
+ * @version 1.0
  * @date 2015年3月14日 上午10:09:41
  */
+@SuppressWarnings("deprecation")
 public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements BasicCommands, BinaryJedisCommands, MultiKeyBinaryCommands,
         AdvancedBinaryJedisCommands, BinaryScriptingCommands, JedisCommands, MultiKeyCommands,
         AdvancedJedisCommands, ScriptingCommands, Closeable {
@@ -64,7 +48,7 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         this.masterShard = masterShard;
         this.slaveShards = slaveShards;
         this.master = new Jedis(masterShard);
-        Set<HostAndPort> slaves = new LinkedHashSet<HostAndPort>();
+        Set<HostAndPort> slaves = new LinkedHashSet<>();
         for (JedisShardInfo slaveShard : slaveShards) {
             slaves.add(new HostAndPort(slaveShard.getHost(), slaveShard.getPort()));
         }
@@ -76,7 +60,7 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         this.masterShard = masterShard;
         this.slaveShards = slaveShards;
         this.master = new Jedis(masterShard);
-        Set<HostAndPort> slaves = new LinkedHashSet<HostAndPort>();
+        Set<HostAndPort> slaves = new LinkedHashSet<>();
         for (JedisShardInfo slaveShard : slaveShards) {
             slaves.add(new HostAndPort(slaveShard.getHost(), slaveShard.getPort()));
         }
@@ -88,7 +72,7 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         this.masterShard = masterShard;
         this.slaveShards = slaveShards;
         this.master = new Jedis(masterShard);
-        Set<HostAndPort> slaves = new LinkedHashSet<HostAndPort>();
+        Set<HostAndPort> slaves = new LinkedHashSet<>();
         for (JedisShardInfo slaveShard : slaveShards) {
             slaves.add(new HostAndPort(slaveShard.getHost(), slaveShard.getPort()));
         }
@@ -100,7 +84,7 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         this.masterShard = masterShard;
         this.slaveShards = slaveShards;
         this.master = new Jedis(masterShard);
-        Set<HostAndPort> slaves = new LinkedHashSet<HostAndPort>();
+        Set<HostAndPort> slaves = new LinkedHashSet<>();
         for (JedisShardInfo slaveShard : slaveShards) {
             slaves.add(new HostAndPort(slaveShard.getHost(), slaveShard.getPort()));
         }
@@ -111,7 +95,7 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
      * 获取当前所有Slave中的某个Slave
      *
      * @param slaveHolder - 如果每次调用opsForSlave()方法的入参slaveHolder相同的话,那么其获取的Slave也是相同的
-     * @return                    - 返回从Jedis
+     * @return - 返回从Jedis
      */
     public Jedis opsForSlave(String... slaveHolder) {
         String holder = null;
@@ -200,6 +184,11 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
 
     public Long del(String... keys) {
         return master.del(keys);
+    }
+
+    @Override
+    public Long exists(String... keys) {
+        return null;
     }
 
     public List<String> blpop(int timeout, String... keys) {
@@ -326,13 +315,18 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         return master.bitop(op, destKey, srcKeys);
     }
 
-    @Deprecated
+    @Override
     public ScanResult<String> scan(int cursor) {
-        return master.scan(cursor);
+        return null;
     }
 
     public ScanResult<String> scan(String cursor) {
         return master.scan(cursor);
+    }
+
+    @Override
+    public ScanResult<String> scan(String cursor, ScanParams params) {
+        return null;
     }
 
     public String pfmerge(String destkey, String... sourcekeys) {
@@ -350,6 +344,11 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
     public String set(String key, String value, String nxxx, String expx,
                       long time) {
         return master.set(key, value, nxxx, expx, time);
+    }
+
+    @Override
+    public String set(String key, String value, String nxxx) {
+        return null;
     }
 
     public String get(String key) {
@@ -376,8 +375,18 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         return master.expireAt(key, unixTime);
     }
 
+    @Override
+    public Long pexpireAt(String key, long millisecondsTimestamp) {
+        return null;
+    }
+
     public Long ttl(String key) {
         return master.ttl(key);
+    }
+
+    @Override
+    public Long pttl(String key) {
+        return null;
     }
 
     public Boolean setbit(String key, long offset, boolean value) {
@@ -410,6 +419,11 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
 
     public String setex(String key, int seconds, String value) {
         return master.setex(key, seconds, value);
+    }
+
+    @Override
+    public String psetex(String key, long milliseconds, String value) {
+        return null;
     }
 
     public Long decrBy(String key, long integer) {
@@ -548,6 +562,11 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         return master.spop(key);
     }
 
+    @Override
+    public Set<String> spop(String key, long count) {
+        return null;
+    }
+
     public Long scard(String key) {
         return master.scard(key);
     }
@@ -572,8 +591,18 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         return master.zadd(key, score, member);
     }
 
+    @Override
+    public Long zadd(String key, double score, String member, ZAddParams params) {
+        return null;
+    }
+
     public Long zadd(String key, Map<String, Double> scoreMembers) {
         return master.zadd(key, scoreMembers);
+    }
+
+    @Override
+    public Long zadd(String key, Map<String, Double> scoreMembers, ZAddParams params) {
+        return null;
     }
 
     public Set<String> zrange(String key, long start, long end) {
@@ -586,6 +615,11 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
 
     public Double zincrby(String key, double score, String member) {
         return master.zincrby(key, score, member);
+    }
+
+    @Override
+    public Double zincrby(String key, double score, String member, ZIncrByParams params) {
+        return null;
     }
 
     public Long zrank(String key, String member) {
@@ -731,6 +765,16 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         return master.zrangeByLex(key, min, max, offset, count);
     }
 
+    @Override
+    public Set<String> zrevrangeByLex(String key, String max, String min) {
+        return null;
+    }
+
+    @Override
+    public Set<String> zrevrangeByLex(String key, String max, String min, int offset, int count) {
+        return null;
+    }
+
     public Long zremrangeByLex(String key, String min, String max) {
         return master.zremrangeByLex(key, min, max);
     }
@@ -748,18 +792,18 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         return master.rpushx(key, string);
     }
 
-    @Deprecated
+    @Override
     public List<String> blpop(String arg) {
-        return master.blpop(arg);
+        return null;
     }
 
     public List<String> blpop(int timeout, String key) {
         return master.blpop(timeout, key);
     }
 
-    @Deprecated
+    @Override
     public List<String> brpop(String arg) {
-        return master.brpop(arg);
+        return null;
     }
 
     public List<String> brpop(int timeout, String key) {
@@ -786,31 +830,56 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         return master.bitcount(key, start, end);
     }
 
-    @Deprecated
+    @Override
+    public Long bitpos(String key, boolean value) {
+        return null;
+    }
+
+    @Override
+    public Long bitpos(String key, boolean value, BitPosParams params) {
+        return null;
+    }
+
+    @Override
     public ScanResult<Entry<String, String>> hscan(String key, int cursor) {
-        return master.hscan(key, cursor);
+        return null;
     }
 
-    @Deprecated
+    @Override
     public ScanResult<String> sscan(String key, int cursor) {
-        return master.sscan(key, cursor);
+        return null;
     }
 
-    @Deprecated
+    @Override
     public ScanResult<Tuple> zscan(String key, int cursor) {
-        return master.zscan(key, cursor);
+        return null;
     }
 
     public ScanResult<Entry<String, String>> hscan(String key, String cursor) {
         return master.hscan(key, cursor);
     }
 
+    @Override
+    public ScanResult<Entry<String, String>> hscan(String key, String cursor, ScanParams params) {
+        return null;
+    }
+
     public ScanResult<String> sscan(String key, String cursor) {
         return master.sscan(key, cursor);
     }
 
+    @Override
+    public ScanResult<String> sscan(String key, String cursor, ScanParams params) {
+        return null;
+    }
+
     public ScanResult<Tuple> zscan(String key, String cursor) {
         return master.zscan(key, cursor);
+    }
+
+    @Override
+    public ScanResult<Tuple> zscan(String key, String cursor, ScanParams params) {
+        return null;
     }
 
     public Long pfadd(String key, String... elements) {
@@ -819,6 +888,56 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
 
     public long pfcount(String key) {
         return master.pfcount(key);
+    }
+
+    @Override
+    public Long geoadd(String key, double longitude, double latitude, String member) {
+        return null;
+    }
+
+    @Override
+    public Long geoadd(String key, Map<String, GeoCoordinate> memberCoordinateMap) {
+        return null;
+    }
+
+    @Override
+    public Double geodist(String key, String member1, String member2) {
+        return null;
+    }
+
+    @Override
+    public Double geodist(String key, String member1, String member2, GeoUnit unit) {
+        return null;
+    }
+
+    @Override
+    public List<String> geohash(String key, String... members) {
+        return null;
+    }
+
+    @Override
+    public List<GeoCoordinate> geopos(String key, String... members) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadius(String key, double longitude, double latitude, double radius, GeoUnit unit) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadius(String key, double longitude, double latitude, double radius, GeoUnit unit, GeoRadiusParam param) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadiusByMember(String key, String member, double radius, GeoUnit unit) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadiusByMember(String key, String member, double radius, GeoUnit unit, GeoRadiusParam param) {
+        return null;
     }
 
     public Object eval(byte[] script, byte[] keyCount, byte[]... params) {
@@ -903,6 +1022,11 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
 
     public Long del(byte[]... keys) {
         return master.del(keys);
+    }
+
+    @Override
+    public Long exists(byte[]... keys) {
+        return null;
     }
 
     public List<byte[]> blpop(int timeout, byte[]... keys) {
@@ -1045,6 +1169,16 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         return master.set(key, value);
     }
 
+    @Override
+    public String set(byte[] key, byte[] value, byte[] nxxx) {
+        return null;
+    }
+
+    @Override
+    public String set(byte[] key, byte[] value, byte[] nxxx, byte[] expx, long time) {
+        return null;
+    }
+
     public byte[] get(byte[] key) {
         return master.get(key);
     }
@@ -1065,8 +1199,23 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         return master.expire(key, seconds);
     }
 
+    @Override
+    public Long pexpire(String key, long milliseconds) {
+        return null;
+    }
+
+    @Override
+    public Long pexpire(byte[] key, long milliseconds) {
+        return null;
+    }
+
     public Long expireAt(byte[] key, long unixTime) {
         return master.expireAt(key, unixTime);
+    }
+
+    @Override
+    public Long pexpireAt(byte[] key, long millisecondsTimestamp) {
+        return null;
     }
 
     public Long ttl(byte[] key) {
@@ -1241,6 +1390,11 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         return master.spop(key);
     }
 
+    @Override
+    public Set<byte[]> spop(byte[] key, long count) {
+        return null;
+    }
+
     public Long scard(byte[] key) {
         return master.scard(key);
     }
@@ -1265,8 +1419,18 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         return master.zadd(key, score, member);
     }
 
+    @Override
+    public Long zadd(byte[] key, double score, byte[] member, ZAddParams params) {
+        return null;
+    }
+
     public Long zadd(byte[] key, Map<byte[], Double> scoreMembers) {
         return master.zadd(key, scoreMembers);
+    }
+
+    @Override
+    public Long zadd(byte[] key, Map<byte[], Double> scoreMembers, ZAddParams params) {
+        return null;
     }
 
     public Set<byte[]> zrange(byte[] key, long start, long end) {
@@ -1279,6 +1443,11 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
 
     public Double zincrby(byte[] key, double score, byte[] member) {
         return master.zincrby(key, score, member);
+    }
+
+    @Override
+    public Double zincrby(byte[] key, double score, byte[] member, ZIncrByParams params) {
+        return null;
     }
 
     public Long zrank(byte[] key, byte[] member) {
@@ -1424,6 +1593,16 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         return master.zrangeByLex(key, min, max, offset, count);
     }
 
+    @Override
+    public Set<byte[]> zrevrangeByLex(byte[] key, byte[] max, byte[] min) {
+        return null;
+    }
+
+    @Override
+    public Set<byte[]> zrevrangeByLex(byte[] key, byte[] max, byte[] min, int offset, int count) {
+        return null;
+    }
+
     public Long zremrangeByLex(byte[] key, byte[] min, byte[] max) {
         return master.zremrangeByLex(key, min, max);
     }
@@ -1441,14 +1620,14 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         return master.rpushx(key, arg);
     }
 
-    @Deprecated
+    @Override
     public List<byte[]> blpop(byte[] arg) {
-        return master.blpop(arg);
+        return null;
     }
 
-    @Deprecated
+    @Override
     public List<byte[]> brpop(byte[] arg) {
-        return master.brpop(arg);
+        return null;
     }
 
     public Long del(byte[] key) {
@@ -1477,6 +1656,56 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
 
     public long pfcount(byte[] key) {
         return master.pfcount(key);
+    }
+
+    @Override
+    public Long geoadd(byte[] key, double longitude, double latitude, byte[] member) {
+        return null;
+    }
+
+    @Override
+    public Long geoadd(byte[] key, Map<byte[], GeoCoordinate> memberCoordinateMap) {
+        return null;
+    }
+
+    @Override
+    public Double geodist(byte[] key, byte[] member1, byte[] member2) {
+        return null;
+    }
+
+    @Override
+    public Double geodist(byte[] key, byte[] member1, byte[] member2, GeoUnit unit) {
+        return null;
+    }
+
+    @Override
+    public List<byte[]> geohash(byte[] key, byte[]... members) {
+        return null;
+    }
+
+    @Override
+    public List<GeoCoordinate> geopos(byte[] key, byte[]... members) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadius(byte[] key, double longitude, double latitude, double radius, GeoUnit unit) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadius(byte[] key, double longitude, double latitude, double radius, GeoUnit unit, GeoRadiusParam param) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadiusByMember(byte[] key, byte[] member, double radius, GeoUnit unit) {
+        return null;
+    }
+
+    @Override
+    public List<GeoRadiusResponse> georadiusByMember(byte[] key, byte[] member, double radius, GeoUnit unit, GeoRadiusParam param) {
+        return null;
     }
 
     public String ping() {
@@ -1616,6 +1845,7 @@ public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements 
         }
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("MasterSlaveJedis {master=" + masterShard.getHost() + ":" + masterShard.getPort() + ", slaves=");

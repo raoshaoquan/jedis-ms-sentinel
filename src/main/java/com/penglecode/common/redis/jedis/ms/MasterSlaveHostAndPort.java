@@ -71,6 +71,7 @@ public class MasterSlaveHostAndPort {
         return true;
     }
 
+    @Override
     public String toString() {
         return "{masterName=" + masterName + ", master=" + master + ", slaves="
                 + slaves + "}";
