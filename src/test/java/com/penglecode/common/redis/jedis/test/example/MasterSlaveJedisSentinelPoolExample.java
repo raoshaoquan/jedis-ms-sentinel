@@ -16,6 +16,7 @@ import com.penglecode.common.redis.jedis.ms.MasterSlaveJedis;
 import com.penglecode.common.redis.jedis.ms.MasterSlaveJedisSentinelPool;
 import com.penglecode.common.redis.jedis.test.AbstractJedisExample;
 
+@SuppressWarnings("deprecation")
 public class MasterSlaveJedisSentinelPoolExample extends AbstractJedisExample<MasterSlaveJedis> {
 
 	public Pool<MasterSlaveJedis> createJedisPool(JedisPoolConfig jedisPoolConfig) {
