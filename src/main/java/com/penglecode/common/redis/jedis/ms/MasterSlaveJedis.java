@@ -26,7 +26,6 @@ import redis.clients.util.Slowlog;
  *
  * @author pengpeng
  * @version 1.0
- * @date 2015年3月14日 上午10:09:41
  */
 @SuppressWarnings("deprecation")
 public class MasterSlaveJedis extends Sharded<Jedis, JedisShardInfo> implements BasicCommands, BinaryJedisCommands, MultiKeyBinaryCommands,

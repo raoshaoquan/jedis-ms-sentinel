@@ -8,7 +8,7 @@
     <contextName>tutorialsRedisLogger</contextName>
 
     <!--tomcat webapps路径-->
-    <property name="logback.logs.path" value="logs"/>
+    <property name="logback.logs.path" value="logs/"/>
     <!--项目名-->
     <property name="logback.project.name" value="tutorials-Redis"/>
 

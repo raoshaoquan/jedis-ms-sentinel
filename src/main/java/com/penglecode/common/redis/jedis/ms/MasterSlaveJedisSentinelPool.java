@@ -384,7 +384,7 @@ public class MasterSlaveJedisSentinelPool extends Pool<MasterSlaveJedis> {
      *
      * @version 1.0
      * @author pengpeng
-     * @date 2015年3月14日 上午10:09:00
+     *
      */
     protected static class MasterSlaveJedisFactory implements PooledObjectFactory<MasterSlaveJedis> {
         private JedisShardInfo masterShard;
